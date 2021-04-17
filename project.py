@@ -1,4 +1,5 @@
 import arcade as ar 
+import random
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
@@ -115,9 +116,9 @@ class Player(ar.Sprite):
 
         self.scale = 1
 
-        texture = ar.load_texture('image/HackerB_1.png')
+        texture = ar.load_texture('image/HackerA_1.png')
         self.textures.append(texture)
-        texture = ar.load_texture('image/HackerB_1.png', mirrored=True)
+        texture = ar.load_texture('image/HackerA_1.png', mirrored=True)
         self.textures.append(texture)
         self.direction = RIGHT_FACING
         self.set_texture(self.direction)
@@ -140,7 +141,7 @@ class Player(ar.Sprite):
             self.right = SCREEN_WIDTH-20
  
         if self.bottom < 15:
-            self.bottom =15            
+            self.bottom = 15            
         elif self.top > SCREEN_HEIGHT-15:
             self.top = SCREEN_HEIGHT-15
 
@@ -154,6 +155,7 @@ class Mygame(ar.View):
         self.player = None
         self.enemy_list = None 
         self.coin_list = None 
+        self.collision_list = None 
         self.map_number = -1
         self.comback = False
 
@@ -166,6 +168,7 @@ class Mygame(ar.View):
         self.view_bottom = 0
 
         self.coin = 0 
+        self.hp = 3 
 
         self.back_list = ar.SpriteList()
         self.vxod_list = ar.SpriteList()
@@ -176,6 +179,7 @@ class Mygame(ar.View):
         self.finish = ar.SpriteList()
         self.all_wall_list = ar.SpriteList()
         self.player = Player()
+        self.collision_list = ar.SpriteList()
 
         # coordinate_list = [[780,775],[780,785],[790,780]]
 
@@ -203,7 +207,62 @@ class Mygame(ar.View):
         self.stena_list = ar.tilemap.process_layer(my_map,'stena',map_scale)
         self.start = ar.tilemap.process_layer(my_map,'start',map_scale)
         self.finish = ar.tilemap.process_layer(my_map,'finish',map_scale)
+        self.enemy_list = ar.tilemap.process_layer(my_map,'enemy',map_scale)
+        self.collision_list = ar.tilemap.process_layer(my_map,'enemy_block',map_scale)
+
+        #enemy speed
+        for enemy in self.enemy_list:
+            enemy.change_x = random.randrange(-3,3,2)
+
+        # self.enemy_list[0].change_x = 3
+
+        for i in range(2):
+            coin = ar.Sprite('image\Money.png',2)
+            coin.center_x = 45
+            coin.center_y = 200 + i * 64
+            self.coin_list.append(coin)
+
+        for i in range(2):
+            coin = ar.Sprite('image\Money.png',2)
+            coin.center_x = 200
+            coin.center_y = 560 + i * 64
+            self.coin_list.append(coin)
+
+        for i in range(3):
+            coin = ar.Sprite('image\Money.png',2)
+            coin.center_x = 450
+            coin.center_y = 520 + i * 64
+            self.coin_list.append(coin)
         
+        for i in range(1):
+            coin = ar.Sprite('image\Money.png',2)
+            coin.center_x = 400
+            coin.center_y = 260 + i * 64
+            self.coin_list.append(coin)
+
+        for i in range(1):
+            coin = ar.Sprite('image\Money.png',2)
+            coin.center_x = 500
+            coin.center_y = 60 + i * 64
+            self.coin_list.append(coin)
+
+        for i in range(1):
+            coin = ar.Sprite('image\Money.png',2)
+            coin.center_x = 540
+            coin.center_y = 260 + i * 64
+            self.coin_list.append(coin)            
+
+        for i in range(2):
+            coin = ar.Sprite('image\Money.png',2)
+            coin.center_x = 560 + i * 64
+            coin.center_y = 605 
+            self.coin_list.append(coin)          
+
+        for i in range(2):
+            coin = ar.Sprite('image\Money.png',2)
+            coin.center_x = 160 + i * 64
+            coin.center_y = 320 
+            self.coin_list.append(coin)        
         
         self.physics_engine = ar.PhysicsEngineSimple(self.player, self.stena_list)
 
@@ -217,22 +276,32 @@ class Mygame(ar.View):
         self.finish.draw()
         self.player.draw()
         self.enemy_list.draw()
+        # self.collision_list.draw()
 
-        ar.draw_text(f'Количество монет: {self.coin}',100,-2,ar.color.PINK,20)
+        ar.draw_text(f'Количество монет: {self.coin}',100,-2,ar.color.RED,14)
+        ar.draw_text(f'Жизни: {self.hp}',200,-2,ar.color.RED,14)
 
-        ar.draw_text("Для перезагрузки игры нажмите пробел",SCREEN_WIDTH-10, 1,ar.color.PINK,20,anchor_x="right")
+        ar.draw_text("Для перезагрузки игры нажмите пробел",SCREEN_WIDTH-100, 1,ar.color.RED,14,anchor_x="right")
         
         
     def update(self,delta_time):
         self.physics_engine.update()
         self.player.update_animation()
         self.player.update()
+        self.enemy_list.update()
+
+        #code dlya otskoka
+        for enemy in self.enemy_list:
+            # collisia
+            if ar.check_for_collision_with_list(enemy, self.collision_list):
+                #code vupolnenie
+                enemy.change_x *= -1 
 
         for coin in self.coin_list:
             if ar.check_for_collision(coin,self.player):
                 self.coin += 1 
                 coin.remove_from_sprite_lists()
-                self.coin_sound.play(0.005)
+                self.coin_sound.play(0.05)
 
 
 
@@ -248,10 +317,10 @@ class Mygame(ar.View):
                 self.comback=True
                 self.setup()
         
-        # for finish in self.finish:
-        #     if ar.check_for_collision(finish, self.player):
-        #         game_over = GameOver() # присвоение основного класса игры
-        #         self.window.show_view(game_over) # переход на другое окно
+        for finish in self.finish:
+            if ar.check_for_collision(finish, self.player):
+                game_over = GameOver() # присвоение основного класса игры
+                self.window.show_view(game_over) # переход на другое окно
 
         # for enemy in self.enemy_list:
         #     if ar.check_for_collision_with_list(enemy,self.wall_list):
