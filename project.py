@@ -46,6 +46,9 @@ class GameOver(ar.View):
     def on_draw(self):
         ar.start_render()
 
+        texture = ar.load_texture('image\Win.png')
+        ar.draw_texture_rectangle(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, SCREEN_WIDTH, SCREEN_HEIGHT, texture)
+
         # текст меню
         ar.draw_text('Поздравляем! Вы выиграли!',SCREEN_WIDTH/2,SCREEN_HEIGHT/2,ar.color.BLACK,35, anchor_x="center")
         ar.draw_text('Нажмите ПРОБЕЛ для начала',SCREEN_WIDTH/2,125,ar.color.BLACK,18, anchor_x="center")
@@ -65,6 +68,19 @@ class GameOver(ar.View):
             self.window.close()
 
 # class Task(ar.View):
+#     def on_show(self):
+#         ar.set_background_color(ar.color.BLUE_BELL)
+
+#     def on_draw(self):
+#         ar.start_render()
+
+#     def on_key_press(self,key,modification):
+#         if key == ar.key.ENTER:
+#             mygame = Mygame()
+#             mygame.setup()
+#             self.window.show_view(mygame)
+
+
 
 
 
@@ -130,7 +146,7 @@ class Player(ar.Sprite):
             self.direction = LEFT_FACING
 
         # условие смены направления изображения
-        if self.change_x > 0 and self.direction == LEFT_FACING:  # движение влево
+        if self.change_x > 0 and self.direction == LEFT_FACING:  # движение влевоz
             self.direction = RIGHT_FACING
         
         self.set_texture(self.direction)
@@ -158,8 +174,10 @@ class Mygame(ar.View):
         self.collision_list = None 
         self.map_number = -1
         self.comback = False
+        self.question = False 
 
         self.coin_sound = ar.Sound('sound\Sound_19349.mp3')
+        self.damage_sound = ar.Sound('sound\damage by kirik.m4a')
         
         
     def setup(self):
@@ -180,6 +198,9 @@ class Mygame(ar.View):
         self.all_wall_list = ar.SpriteList()
         self.player = Player()
         self.collision_list = ar.SpriteList()
+        self.question_list = ['Что отвечает за зарисовки картины?','Как инцеализируется библиотека?','Как называется команда открытие окна?']
+
+
 
         # coordinate_list = [[780,775],[780,785],[790,780]]
 
@@ -278,10 +299,19 @@ class Mygame(ar.View):
         self.enemy_list.draw()
         # self.collision_list.draw()
 
-        ar.draw_text(f'Количество монет: {self.coin}',100,-2,ar.color.RED,14)
-        ar.draw_text(f'Жизни: {self.hp}',200,-2,ar.color.RED,14)
+        ar.draw_text(f'Количество монет: {self.coin}',100,1,ar.color.RED,14)
+        ar.draw_text(f'Жизни: {self.hp}',280,1,ar.color.RED,14)
 
         ar.draw_text("Для перезагрузки игры нажмите пробел",SCREEN_WIDTH-100, 1,ar.color.RED,14,anchor_x="right")
+
+        if self.question == True:
+
+            # self.ran = random.randint(0,2)
+            ar.draw_rectangle_filled(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 400,200, ar.color.LIGHT_SKY_BLUE)
+            ar.draw_text(f"{self.question_list[self.ran]}", SCREEN_WIDTH/2, SCREEN_HEIGHT/2, ar.color.BLACK,20, anchor_x="center")
+            ar.draw_text("Yes", SCREEN_WIDTH/2-150, SCREEN_HEIGHT/2-100, ar.color.BLACK,20, anchor_x="center")
+            ar.draw_text("No", SCREEN_WIDTH/2+150, SCREEN_HEIGHT/2-100 , ar.color.BLACK,20, anchor_x="center")
+
         
         
     def update(self,delta_time):
@@ -292,6 +322,12 @@ class Mygame(ar.View):
 
         #code dlya otskoka
         for enemy in self.enemy_list:
+
+            if self.hp <=0:
+                return
+
+
+
             # collisia
             if ar.check_for_collision_with_list(enemy, self.collision_list):
                 #code vupolnenie
@@ -302,6 +338,18 @@ class Mygame(ar.View):
                 self.coin += 1 
                 coin.remove_from_sprite_lists()
                 self.coin_sound.play(0.05)
+
+        # if ar.check_for_collision(enemy,self.player):
+        #     self.hp -=1
+        #     # self.player.center_x = 300
+        #     # self.player.center_y = 300
+        #     self.damage_sound.play(0.05)
+
+        # for self.enemy_list in self.task:
+        #     if ar.check_for_collision(self.enemy_list,self.player):
+
+
+
 
 
 
@@ -321,6 +369,12 @@ class Mygame(ar.View):
             if ar.check_for_collision(finish, self.player):
                 game_over = GameOver() # присвоение основного класса игры
                 self.window.show_view(game_over) # переход на другое окно
+
+        for enemy_list in self.enemy_list:
+            if ar.check_for_collision(self.player, enemy_list):
+                self.question = True 
+                enemy_list.remove_from_sprite_lists()
+                self.ran = random.randint(0,2)
 
         # for enemy in self.enemy_list:
         #     if ar.check_for_collision_with_list(enemy,self.wall_list):
@@ -351,6 +405,16 @@ class Mygame(ar.View):
             self.map_number = -1
             self.comback = False
             self.setup()
+
+        if key == ar.key.Y:
+            self.question = False
+
+        if key == ar.key.N:
+            self.question = False
+
+        # if key == ar.key.E:
+        #     task = Task()
+        #     self.window.show_view(task)            
             
         
 
