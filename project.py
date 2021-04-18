@@ -50,10 +50,10 @@ class GameOver(ar.View):
         ar.draw_texture_rectangle(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, SCREEN_WIDTH, SCREEN_HEIGHT, texture)
 
         # текст меню
-        ar.draw_text('Поздравляем! Вы выиграли!',SCREEN_WIDTH/2,SCREEN_HEIGHT/2,ar.color.BLACK,35, anchor_x="center")
-        ar.draw_text('Нажмите ПРОБЕЛ для начала',SCREEN_WIDTH/2,125,ar.color.BLACK,18, anchor_x="center")
-        ar.draw_text('Нажмите ESC для перехода в меню',SCREEN_WIDTH/2,100,ar.color.BLACK,18, anchor_x="center")
-        ar.draw_text('Нажмите Q для выхода',SCREEN_WIDTH/2,75,ar.color.BLACK,18, anchor_x="center")
+        # ar.draw_text('Поздравляем! Вы выиграли!',SCREEN_WIDTH/2,SCREEN_HEIGHT/2,ar.color.BLACK,35, anchor_x="center")
+        # ar.draw_text('Нажмите ПРОБЕЛ для начала',SCREEN_WIDTH/2,125,ar.color.BLACK,18, anchor_x="center")
+        # ar.draw_text('Нажмите ESC для перехода в меню',SCREEN_WIDTH/2,100,ar.color.BLACK,18, anchor_x="center")
+        # ar.draw_text('Нажмите Q для выхода',SCREEN_WIDTH/2,75,ar.color.BLACK,18, anchor_x="center")
     
     def on_key_press(self,key,modification):
         # условие нажатия правой кнопкой мыши
